@@ -1,0 +1,65 @@
+{
+ "charts": [],
+ "content": "[{\"id\":\"0rL4nLCR5s\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Triple N Caregivers Connection</span>\",\"col\":12}},{\"id\":\"Ty-dDLj6OS\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"W7ZtqX6dP3\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"User\",\"col\":4}},{\"id\":\"hfcKTJiA5m\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Job Posting\",\"col\":4}},{\"id\":\"LCmfri80Kf\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Job Application\",\"col\":4}},{\"id\":\"q3zrErQvAz\",\"type\":\"quick_list\",\"data\":{\"quick_list_name\":\"Job Posting\",\"col\":4}},{\"id\":\"gZjb43yrHT\",\"type\":\"quick_list\",\"data\":{\"quick_list_name\":\"Job Application\",\"col\":4}}]",
+ "creation": "2026-04-29 16:29:01.937830",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "color-review-points",
+ "idx": 0,
+ "indicator_color": "green",
+ "is_hidden": 0,
+ "label": "TripleN",
+ "links": [],
+ "modified": "2026-04-29 16:32:52.604780",
+ "modified_by": "Administrator",
+ "module": "Triplen Connection",
+ "name": "TripleN",
+ "number_cards": [],
+ "owner": "Administrator",
+ "parent_page": "",
+ "public": 1,
+ "quick_lists": [
+  {
+   "document_type": "Job Posting",
+   "label": "Job Posting",
+   "quick_list_filter": "[[\"Job Posting\",\"status\",\"=\",\"Active\",false]]"
+  },
+  {
+   "document_type": "Job Application",
+   "label": "Job Application",
+   "quick_list_filter": "[[\"Job Application\",\"status\",\"=\",\"Pending\",false]]"
+  }
+ ],
+ "roles": [],
+ "sequence_id": 28.0,
+ "shortcuts": [
+  {
+   "color": "Yellow",
+   "doc_view": "List",
+   "label": "User",
+   "link_to": "User",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Pink",
+   "doc_view": "List",
+   "label": "Job Posting",
+   "link_to": "Job Posting",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Green",
+   "doc_view": "List",
+   "label": "Job Application",
+   "link_to": "Job Application",
+   "stats_filter": "[]",
+   "type": "DocType"
+  }
+ ],
+ "title": "TripleN"
+}
