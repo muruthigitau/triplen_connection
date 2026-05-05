@@ -1,6 +1,7 @@
 import frappe
 from frappe import _
 
+from triplen_connection.api.auth import get_frontend_url
 from triplen_connection.triplen_connection.doctype.caregiver_membership.caregiver_membership import (
 	get_payment_url,
 )
@@ -65,10 +66,12 @@ def check_or_create_membership():
 		}
 
 	method = m_type.payment_methods[0]
+	redirect_to = get_frontend_url()
 
 	payment_url = get_payment_url(
 		membership_name=pending_membership,
 		gateway=method.payment_gateway,
+		redirect_to=redirect_to,
 	)
 
 	return {
