@@ -66,7 +66,7 @@ def check_or_create_membership():
 		}
 
 	method = m_type.payment_methods[0]
-	redirect_to = get_frontend_url()
+	redirect_to = f"{get_frontend_url().rstrip('/')}/dashboard"
 
 	payment_url = get_payment_url(
 		membership_name=pending_membership,
