@@ -1,0 +1,1086 @@
+{% extends "templates/web.html" %} {% block title %}{% if stripe_request %}{{ stripe_request.title
+or "Secure Payment" }} - {{ company_name }}{% else %}Payment Request{% endif %}{% endblock %} {%
+block head_include %}
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="description" content="Secure payment page" />
+{% endblock %} {% block style %}
+<style>
+	:root {
+	    --primary-color: {{ primary_color or "#635bff" }};
+	    --primary-dark: {{ secondary_color or "#764ba2" }};
+	    --success-color: #10b981;
+	    --error-color: #ef4444;
+	    --warning-color: #f59e0b;
+	    --text-primary: #1f2937;
+	    --text-secondary: #6b7280;
+	    --bg-light: #f9fafb;
+	    --border-color: #e5e7eb;
+	}
+
+	* {
+	    margin: 0;
+	    padding: 0;
+	    box-sizing: border-box;
+	}
+
+	body {
+	    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+	    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', Roboto, 'Helvetica Neue', Arial, sans-serif;
+	    min-height: 100vh;
+	    color: var(--text-primary);
+	}
+
+	/* Hide Frappe navbar and footer */
+	.navbar, .web-footer, .page-container, .page-head {
+	    display: none !important;
+	}
+
+	/* Main Container */
+	.stripe-payment-container {
+	    width: 100%;
+	    min-height: 100vh;
+	    display: flex;
+	    align-items: center;
+	    justify-content: center;
+	    padding: 1rem;
+	}
+
+	/* Payment Card */
+	.payment-card {
+	    background: white;
+	    border-radius: 24px;
+	    box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.2);
+	    overflow: hidden;
+	    width: 100%;
+	    animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+	}
+
+	/* 2-Column Layout for Large Screens */
+	@media (min-width: 900px) {
+		.payment-card {
+			max-width: 900px;
+		}
+
+		.payment-content {
+			display: flex;
+			flex-direction: row;
+		}
+
+		.payment-header {
+			flex: 0 0 280px;
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			padding: 2rem 1.5rem;
+		}
+
+		.payment-header::after {
+			display: none;
+		}
+
+		.payment-body {
+			flex: 1;
+			padding: 2rem 2rem 2rem 1.5rem;
+			background: white;
+		}
+
+		.payment-details {
+			margin-bottom: 1.5rem;
+		}
+	}
+
+	/* Medium screens */
+	@media (min-width: 768px) and (max-width: 899px) {
+		.payment-card {
+			max-width: 520px;
+		}
+	}
+
+	/* Mobile - single column */
+	@media (max-width: 899px) {
+		.payment-card {
+			max-width: 480px;
+		}
+	}
+
+	@keyframes slideUp {
+	    from {
+	        opacity: 0;
+	        transform: translateY(30px);
+	    }
+	    to {
+	        opacity: 1;
+	        transform: translateY(0);
+	    }
+	}
+
+	/* Header Section */
+	.payment-header {
+	    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+	    text-align: center;
+	    position: relative;
+	}
+
+	@media (max-width: 899px) {
+		.payment-header {
+			padding: 2rem 1.5rem;
+		}
+
+		.payment-header::after {
+		    content: '';
+		    position: absolute;
+		    bottom: -20px;
+		    left: 0;
+		    right: 0;
+		    height: 40px;
+		    background: white;
+		    border-radius: 40px 40px 0 0;
+		}
+	}
+
+	.company-logo {
+	    max-width: 80px;
+	    max-height: 48px;
+	    margin-bottom: 1rem;
+	    filter: brightness(0) invert(1);
+	}
+
+	.payment-header h1 {
+	    color: white;
+	    font-size: 1.5rem;
+	    font-weight: 700;
+	    margin-bottom: 0.75rem;
+	}
+
+	.payment-amount {
+	    background: rgba(255, 255, 255, 0.2);
+	    backdrop-filter: blur(10px);
+	    display: inline-block;
+	    padding: 0.5rem 1.25rem;
+	    border-radius: 40px;
+	    color: white;
+	    font-size: 1.125rem;
+	    font-weight: 600;
+	    letter-spacing: 0.5px;
+	    border: 1px solid rgba(255, 255, 255, 0.3);
+	}
+
+	/* Body Section */
+	.payment-body {
+	    padding: 1.75rem;
+	}
+
+	/* Payment Details - Compact */
+	.payment-details {
+	    background: var(--bg-light);
+	    border-radius: 16px;
+	    padding: 1rem;
+	    margin-bottom: 1.5rem;
+	    border: 1px solid var(--border-color);
+	}
+
+	.detail-item {
+	    display: flex;
+	    justify-content: space-between;
+	    align-items: center;
+	    padding: 0.5rem 0;
+	    border-bottom: 1px solid var(--border-color);
+	}
+
+	.detail-item:last-child {
+	    border-bottom: none;
+	    padding-bottom: 0;
+	}
+
+	.detail-item:first-child {
+	    padding-top: 0;
+	}
+
+	.detail-label {
+	    color: var(--text-secondary);
+	    font-size: 0.75rem;
+	    font-weight: 500;
+	    display: flex;
+	    align-items: center;
+	    gap: 0.5rem;
+	}
+
+	.detail-icon {
+	    font-size: 0.875rem;
+	}
+
+	.detail-value {
+	    color: var(--text-primary);
+	    font-size: 0.813rem;
+	    font-weight: 600;
+	    word-break: break-word;
+	    text-align: right;
+	    max-width: 60%;
+	}
+
+	/* Form Styles - Compact */
+	.form-group {
+	    margin-bottom: 1rem;
+	}
+
+	.form-label {
+	    display: block;
+	    margin-bottom: 0.375rem;
+	    color: var(--text-primary);
+	    font-weight: 600;
+	    font-size: 0.75rem;
+	}
+
+	.form-input {
+	    width: 100%;
+	    padding: 0.5rem 0.75rem;
+	    border: 1.5px solid var(--border-color);
+	    border-radius: 10px;
+	    font-size: 0.813rem;
+	    transition: all 0.2s ease;
+	    font-family: inherit;
+	    background: white;
+	}
+
+	.form-input:focus {
+	    outline: none;
+	    border-color: var(--primary-color);
+	    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+	}
+
+	/* Stripe Element */
+	#card-element {
+	    padding: 0.5rem 0.75rem;
+	    border: 1.5px solid var(--border-color);
+	    border-radius: 10px;
+	    background: white;
+	    transition: all 0.2s ease;
+	    min-height: 38px;
+	}
+
+	#card-element.StripeElement--focus {
+	    border-color: var(--primary-color);
+	    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+	}
+
+	#card-element.StripeElement--invalid {
+	    border-color: var(--error-color);
+	}
+
+	.card-errors {
+	    color: var(--error-color);
+	    font-size: 0.688rem;
+	    margin-top: 0.375rem;
+	    display: none;
+	}
+
+	.card-errors.visible {
+	    display: block;
+	}
+
+	/* Submit Button */
+	.submit-button {
+	    width: 100%;
+	    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+	    color: white;
+	    border: none;
+	    padding: 0.75rem;
+	    border-radius: 40px;
+	    font-size: 0.875rem;
+	    font-weight: 700;
+	    cursor: pointer;
+	    transition: all 0.3s ease;
+	    margin-top: 1.25rem;
+	    display: flex;
+	    align-items: center;
+	    justify-content: center;
+	    gap: 0.5rem;
+	}
+
+	.submit-button:hover:not(:disabled) {
+	    transform: translateY(-1px);
+	    box-shadow: 0 8px 20px -5px rgba(0, 0, 0, 0.2);
+	}
+
+	.submit-button:disabled {
+	    opacity: 0.7;
+	    cursor: not-allowed;
+	}
+
+	.button-loader {
+	    width: 16px;
+	    height: 16px;
+	    border: 2px solid rgba(255, 255, 255, 0.3);
+	    border-radius: 50%;
+	    border-top-color: white;
+	    animation: spin 0.6s linear infinite;
+	    display: none;
+	}
+
+	@keyframes spin {
+	    to { transform: rotate(360deg); }
+	}
+
+	/* Alert Messages */
+	.alert {
+	    padding: 0.75rem;
+	    border-radius: 10px;
+	    margin-bottom: 1rem;
+	    display: none;
+	    align-items: center;
+	    gap: 0.5rem;
+	    animation: slideDown 0.3s ease-out;
+	}
+
+	@keyframes slideDown {
+	    from {
+	        opacity: 0;
+	        transform: translateY(-8px);
+	    }
+	    to {
+	        opacity: 1;
+	        transform: translateY(0);
+	    }
+	}
+
+	.alert.show {
+	    display: flex;
+	}
+
+	.alert.error {
+	    background: #fef2f2;
+	    border-left: 3px solid var(--error-color);
+	    color: var(--error-color);
+	}
+
+	.alert.warning {
+	    background: #fffbeb;
+	    border-left: 3px solid var(--warning-color);
+	    color: #92400e;
+	}
+
+	.alert-icon {
+	    flex-shrink: 0;
+	    width: 18px;
+	    height: 18px;
+	}
+
+	.alert-content {
+		flex: 1;
+	}
+
+	.alert-content strong {
+		display: block;
+		font-size: 0.75rem;
+		margin-bottom: 0.125rem;
+	}
+
+	.alert-text {
+		font-size: 0.688rem;
+	}
+
+	/* Success Screen */
+	.success-screen {
+	    text-align: center;
+	    padding: 1rem 0;
+	}
+
+	.success-icon {
+	    width: 56px;
+	    height: 56px;
+	    background: linear-gradient(135deg, var(--success-color) 0%, #059669 100%);
+	    border-radius: 50%;
+	    display: flex;
+	    align-items: center;
+	    justify-content: center;
+	    margin: 0 auto 1rem;
+	    animation: scaleIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+	}
+
+	@keyframes scaleIn {
+	    from {
+	        transform: scale(0);
+	        opacity: 0;
+	    }
+	    to {
+	        transform: scale(1);
+	        opacity: 1;
+	    }
+	}
+
+	.success-icon svg {
+	    width: 32px;
+	    height: 32px;
+	    color: white;
+	}
+
+	.success-title {
+	    font-size: 1.25rem;
+	    font-weight: 700;
+	    color: var(--success-color);
+	    margin-bottom: 0.5rem;
+	}
+
+	.success-message {
+	    color: var(--text-secondary);
+	    font-size: 0.813rem;
+	    margin-bottom: 1rem;
+	}
+
+	.redirect-message {
+	    font-size: 0.688rem;
+	    color: var(--text-secondary);
+	    margin-top: 1rem;
+	    padding-top: 0.75rem;
+	    border-top: 1px solid var(--border-color);
+	}
+
+	/* Payment Methods */
+	.payment-methods {
+	    display: flex;
+	    gap: 0.75rem;
+	    justify-content: center;
+	    align-items: center;
+	    margin-top: 1rem;
+	    padding-top: 0.75rem;
+	    border-top: 1px solid var(--border-color);
+	}
+
+	.security-badge {
+	    display: flex;
+	    align-items: center;
+	    gap: 0.25rem;
+	    font-size: 0.625rem;
+	    color: var(--text-secondary);
+	}
+
+	/* Mobile optimizations */
+	@media (max-width: 640px) {
+		.stripe-payment-container {
+			padding: 0.5rem;
+		}
+
+		.payment-card {
+			border-radius: 20px;
+		}
+
+		.payment-body {
+			padding: 1.25rem;
+		}
+
+		.payment-details {
+			padding: 0.75rem;
+		}
+
+		.detail-item {
+			padding: 0.375rem 0;
+		}
+
+		.form-group {
+			margin-bottom: 0.875rem;
+		}
+
+		.submit-button {
+			padding: 0.625rem;
+			font-size: 0.813rem;
+		}
+
+		.success-title {
+			font-size: 1.125rem;
+		}
+	}
+</style>
+{% endblock %} {% block script %}
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+	// Stripe Payment Handler
+	class StripePaymentHandler {
+		constructor() {
+			this.stripe = null;
+			this.card = null;
+			this.clientSecret = "{{ client_secret or '' }}";
+			this.requestId = "{{ request_id or '' }}";
+			this.publishableKey = "{{ publishable_key or '' }}";
+			this.init();
+		}
+
+		init() {
+			if (!this.publishableKey) {
+				this.showError("Payment gateway configuration error.");
+				return;
+			}
+
+			if (!this.requestId) {
+				this.showError("Invalid payment request.");
+				return;
+			}
+
+			if (!this.clientSecret || this.clientSecret === "None") {
+				this.showError("Payment not initialized. Please contact support.");
+				return;
+			}
+
+			try {
+				this.stripe = Stripe(this.publishableKey);
+				this.setupCardElement();
+				this.setupEventListeners();
+			} catch (err) {
+				this.showError("Failed to initialize payment system.");
+				console.error(err);
+			}
+		}
+
+		setupCardElement() {
+			const elements = this.stripe.elements();
+			const style = {
+				base: {
+					color: "#1f2937",
+					fontFamily:
+						'-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+					fontSmoothing: "antialiased",
+					fontSize: "13px",
+					"::placeholder": {
+						color: "#9ca3af",
+					},
+				},
+				invalid: {
+					color: "#ef4444",
+					iconColor: "#ef4444",
+				},
+			};
+
+			this.card = elements.create("card", {
+				hidePostalCode: true,
+				style: style,
+			});
+
+			this.card.mount("#card-element");
+
+			this.card.on("change", (event) => {
+				const displayError = document.getElementById("card-errors");
+				if (event.error) {
+					displayError.textContent = event.error.message;
+					displayError.classList.add("visible");
+				} else {
+					displayError.textContent = "";
+					displayError.classList.remove("visible");
+				}
+			});
+		}
+
+		setupEventListeners() {
+			const form = document.getElementById("payment-form");
+			if (form) {
+				form.addEventListener("submit", (e) => this.handleSubmit(e));
+			}
+		}
+
+		async handleSubmit(e) {
+			e.preventDefault();
+
+			const name = document.getElementById("cardholder-name").value.trim();
+			const email = document.getElementById("cardholder-email").value.trim();
+
+			if (!name || !email) {
+				this.showError("Please enter your name and email address");
+				return;
+			}
+
+			if (!this.validateEmail(email)) {
+				this.showError("Please enter a valid email address");
+				return;
+			}
+
+			this.setLoading(true);
+
+			try {
+				const { paymentIntent, error } = await this.stripe.confirmCardPayment(
+					this.clientSecret,
+					{
+						payment_method: {
+							card: this.card,
+							billing_details: {
+								name: name,
+								email: email,
+							},
+						},
+					},
+				);
+
+				console.log(paymentIntent, error);
+
+				if (error) {
+					this.handlePaymentError(error);
+				} else if (paymentIntent.status === "succeeded") {
+					// await this.confirmPayment(paymentIntent);
+				}
+			} catch (err) {
+				this.showError("An unexpected error occurred. Please try again.");
+				console.error(err);
+			} finally {
+				this.setLoading(false);
+			}
+		}
+
+		async confirmPayment(paymentIntent) {
+			this.showLoading("Processing payment...");
+
+			frappe.call({
+				method: "triplen_connection.triplen_connection.doctype.stripe_request.stripe_request.confirm_stripe_payment",
+				args: {
+					request_id: this.requestId,
+					payment_method_id: paymentIntent.payment_method,
+				},
+				callback: (response) => {
+					if (response.message && response.message.status === "success") {
+						this.showSuccess();
+						this.redirectAfterSuccess();
+					} else {
+						this.showError(response.message?.error || "Payment confirmation failed");
+					}
+				},
+				error: (err) => {
+					this.showError("Failed to confirm payment. Please contact support.");
+					console.error(err);
+				},
+			});
+		}
+
+		handlePaymentError(error) {
+			let message = error.message;
+
+			switch (error.code) {
+				case "card_declined":
+					message = "Your card was declined. Please try a different card.";
+					break;
+				case "expired_card":
+					message = "Your card has expired. Please use a different card.";
+					break;
+				case "incorrect_cvc":
+					message = "Incorrect security code. Please check and try again.";
+					break;
+				case "insufficient_funds":
+					message = "Insufficient funds. Please use a different card.";
+					break;
+			}
+
+			this.showError(message);
+		}
+
+		showSuccess() {
+			const formContainer = document.getElementById("form-container");
+			const successContainer = document.getElementById("success-container");
+
+			if (formContainer && successContainer) {
+				formContainer.style.display = "none";
+				successContainer.style.display = "block";
+			}
+		}
+
+		redirectAfterSuccess() {
+			const redirectUrl = "{{ stripe_request.redirect_url if stripe_request else '/' }}";
+
+			setTimeout(() => {
+				window.location.href = redirectUrl;
+			}, 3000);
+		}
+
+		showError(message) {
+			const errorDiv = document.getElementById("error-message");
+			if (errorDiv) {
+				errorDiv.querySelector(".alert-text").textContent = message;
+				errorDiv.classList.add("show", "error");
+
+				setTimeout(() => {
+					errorDiv.classList.remove("show");
+				}, 5000);
+			}
+		}
+
+		showLoading(message) {
+			const loadingDiv = document.getElementById("loading-message");
+			if (loadingDiv) {
+				loadingDiv.querySelector(".alert-text").textContent = message;
+				loadingDiv.classList.add("show", "warning");
+
+				setTimeout(() => {
+					loadingDiv.classList.remove("show");
+				}, 3000);
+			}
+		}
+
+		setLoading(loading) {
+			const button = document.getElementById("submit-button");
+			const buttonText = document.getElementById("button-text");
+			const buttonLoader = document.getElementById("button-loader");
+
+			if (button) {
+				button.disabled = loading;
+			}
+			if (buttonText) {
+				buttonText.style.display = loading ? "none" : "inline";
+			}
+			if (buttonLoader) {
+				buttonLoader.style.display = loading ? "inline-block" : "none";
+			}
+		}
+
+		validateEmail(email) {
+			const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+			return re.test(email);
+		}
+	}
+
+	frappe.ready(function () {
+		if (document.getElementById("payment-form")) {
+			window.paymentHandler = new StripePaymentHandler();
+		}
+	});
+</script>
+{% endblock %} {% block page_content %}
+<div class="stripe-payment-container">
+	<div class="payment-card">
+		<div class="payment-content">
+			<!-- Payment Header - Left column on large screens -->
+			<div class="payment-header">
+				{% if company_logo %}
+				<img src="{{ company_logo }}" alt="{{ company_name }}" class="company-logo" />
+				{% endif %}
+				<h1>
+					{% if stripe_request %}{{ stripe_request.title or "Secure Payment" }}{% else
+					%}Payment Request{% endif %}
+				</h1>
+				<div class="payment-amount">
+					{% if amount_display %}{{ amount_display }}{% else %}---{% endif %}
+				</div>
+			</div>
+
+			<!-- Payment Body - Right column on large screens -->
+			<div class="payment-body">
+				<!-- Error State - No Stripe Request -->
+				{% if not is_valid and error_message %}
+				<div class="alert error show">
+					<div class="alert-icon">
+						<svg
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke="currentColor"
+							width="18"
+							height="18"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+							/>
+						</svg>
+					</div>
+					<div class="alert-content">
+						<strong>{{ error_title or "Error" }}</strong>
+						<div class="alert-text">{{ error_message }}</div>
+					</div>
+				</div>
+				{% endif %}
+
+				<!-- Payment Already Completed -->
+				{% if payment_completed %}
+				<div class="success-screen">
+					<div class="success-icon">
+						<svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M5 13l4 4L19 7"
+							/>
+						</svg>
+					</div>
+					<div class="success-title">Payment Already Processed</div>
+					<div class="success-message">{{ completion_message }}</div>
+					<a
+						href="{{ redirect_url }}"
+						class="submit-button"
+						style="text-decoration: none; display: inline-block; text-align: center"
+					>
+						Return to {{ company_name }}
+					</a>
+				</div>
+				{% endif %}
+
+				<!-- Payment Expired -->
+				{% if payment_expired %}
+				<div class="alert warning show">
+					<div class="alert-icon">
+						<svg
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke="currentColor"
+							width="18"
+							height="18"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+							/>
+						</svg>
+					</div>
+					<div class="alert-content">
+						<strong>Payment Link Expired</strong>
+						<div class="alert-text">{{ expiry_message }}</div>
+					</div>
+				</div>
+				{% endif %}
+
+				<!-- System Error -->
+				{% if payment_error %}
+				<div class="alert error show">
+					<div class="alert-icon">
+						<svg
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke="currentColor"
+							width="18"
+							height="18"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+							/>
+						</svg>
+					</div>
+					<div class="alert-content">
+						<strong>System Error</strong>
+						<div class="alert-text">{{ error_message }}</div>
+					</div>
+				</div>
+				{% endif %}
+
+				<!-- Main Form Container -->
+				{% if is_valid and stripe_request and not payment_completed and not payment_expired
+				and not payment_error and client_secret and client_secret != 'None' %}
+				<div id="form-container">
+					<!-- Alert Messages -->
+					<div id="error-message" class="alert error">
+						<div class="alert-icon">
+							<svg
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke="currentColor"
+								width="18"
+								height="18"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+								/>
+							</svg>
+						</div>
+						<div class="alert-content">
+							<strong>Error</strong>
+							<div class="alert-text"></div>
+						</div>
+					</div>
+
+					<div id="loading-message" class="alert warning">
+						<div class="alert-icon">
+							<svg
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke="currentColor"
+								width="18"
+								height="18"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+								/>
+							</svg>
+						</div>
+						<div class="alert-content">
+							<strong>Processing</strong>
+							<div class="alert-text"></div>
+						</div>
+					</div>
+
+					<!-- Payment Details Summary -->
+					<div class="payment-details">
+						{% if stripe_request.description %}
+						<div class="detail-item">
+							<div class="detail-label">
+								<span class="detail-icon">📝</span>
+								Description
+							</div>
+							<div class="detail-value">{{ stripe_request.description }}</div>
+						</div>
+						{% endif %} {% if stripe_request.reference_doctype %}
+						<div class="detail-item">
+							<div class="detail-label">
+								<span class="detail-icon">📄</span>
+								Reference
+							</div>
+							<div class="detail-value">
+								{{ stripe_request.reference_doctype }} #{{
+								stripe_request.reference_docname }}
+							</div>
+						</div>
+						{% endif %}
+
+						<div class="detail-item">
+							<div class="detail-label">
+								<span class="detail-icon">💰</span>
+								Amount
+							</div>
+							<div class="detail-value">{{ amount_display }}</div>
+						</div>
+
+						{% if stripe_request.expiry_date %}
+						<div class="detail-item">
+							<div class="detail-label">
+								<span class="detail-icon">⏰</span>
+								Valid Until
+							</div>
+							<div class="detail-value">
+								{{ frappe.utils.formatdate(stripe_request.expiry_date) }}
+							</div>
+						</div>
+						{% endif %}
+					</div>
+
+					<!-- Payment Form -->
+					<form id="payment-form">
+						<div class="form-group">
+							<label class="form-label" for="cardholder-name">Full Name</label>
+							<input
+								type="text"
+								id="cardholder-name"
+								class="form-input"
+								value="{{ stripe_request.payer_name or '' }}"
+								placeholder="John Doe"
+								autocomplete="name"
+								required
+							/>
+						</div>
+
+						<div class="form-group">
+							<label class="form-label" for="cardholder-email">Email Address</label>
+							<input
+								type="email"
+								id="cardholder-email"
+								class="form-input"
+								value="{{ stripe_request.payer_email or '' }}"
+								placeholder="john@example.com"
+								autocomplete="email"
+								required
+							/>
+						</div>
+
+						<div class="form-group">
+							<label class="form-label">Card Details</label>
+							<div id="card-element"></div>
+							<div id="card-errors" class="card-errors"></div>
+						</div>
+
+						<button type="submit" class="submit-button" id="submit-button">
+							<span id="button-loader" class="button-loader"></span>
+							<span id="button-text">Pay {{ amount_display }}</span>
+						</button>
+					</form>
+
+					<!-- Payment Methods Icons -->
+					<div class="payment-methods">
+						<div class="security-badge">
+							<svg
+								width="12"
+								height="12"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+							>
+								<rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+								<path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+							</svg>
+							<span>Secure payment</span>
+						</div>
+						<span style="font-size: 0.625rem; color: var(--text-secondary)"
+							>Powered by Stripe</span
+						>
+					</div>
+				</div>
+				{% elif is_valid and stripe_request and (not client_secret or client_secret ==
+				'None') %}
+				<div class="alert error show">
+					<div class="alert-icon">
+						<svg
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke="currentColor"
+							width="18"
+							height="18"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+							/>
+						</svg>
+					</div>
+					<div class="alert-content">
+						<strong>Payment Not Initialized</strong>
+						<div class="alert-text">
+							Please contact the merchant to complete payment setup.
+						</div>
+					</div>
+				</div>
+				{% endif %}
+
+				<!-- Success Container -->
+				<div id="success-container" style="display: none">
+					<div class="success-screen">
+						<div class="success-icon">
+							<svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M5 13l4 4L19 7"
+								/>
+							</svg>
+						</div>
+						<div class="success-title">Payment Successful!</div>
+						<div class="success-message">
+							Thank you for your payment. Your transaction has been completed
+							successfully.
+						</div>
+						<div class="redirect-message" id="redirect-message">Redirecting...</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+	// Prevent double submission
+	if (document.getElementById("payment-form")) {
+		let submitted = false;
+		document.getElementById("payment-form").addEventListener("submit", function (e) {
+			if (submitted) {
+				e.preventDefault();
+				return false;
+			}
+			submitted = true;
+		});
+	}
+</script>
+{% endblock %}

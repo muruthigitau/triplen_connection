@@ -1,0 +1,490 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-05-03 16:59:40.140243",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "status_section",
+  "status",
+  "request_date",
+  "column_break_status",
+  "payment_method_type",
+  "expiry_date",
+  "gateway_section",
+  "stripe_settings",
+  "payment_gateway",
+  "column_break_gateway",
+  "use_sandbox",
+  "webhook_status",
+  "payment_details_section",
+  "amount",
+  "currency",
+  "column_break_amount",
+  "minimum_amount_check",
+  "amount_in_cents",
+  "reference_section",
+  "reference_doctype",
+  "reference_docname",
+  "column_break_reference",
+  "reference_owner",
+  "reference_status",
+  "payment_info_section",
+  "title",
+  "description",
+  "column_break_payment_info",
+  "redirect_url",
+  "redirect_message",
+  "customer_section",
+  "payer_name",
+  "payer_email",
+  "column_break_customer",
+  "payer_phone",
+  "customer_id",
+  "stripe_payment_section",
+  "stripe_payment_intent_id",
+  "stripe_client_secret",
+  "column_break_stripe",
+  "stripe_payment_method_id",
+  "stripe_customer_id",
+  "metadata_section",
+  "payment_metadata",
+  "custom_metadata",
+  "response_section",
+  "payment_response",
+  "failure_message",
+  "column_break_response",
+  "retry_count",
+  "last_retry_date",
+  "timestamps_section",
+  "created_at",
+  "paid_at",
+  "column_break_timestamps",
+  "refunded_at",
+  "updated_at",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "status_section",
+   "fieldtype": "Section Break",
+   "label": "Status Information"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Draft\nInitiated\nProcessing\nRequires Action\nRequires Confirmation\nRequires Payment Method\nRequires Capture\nSucceeded\nPartially Paid\nFailed\nCanceled\nRefunded\nDisputed",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "default": "Now",
+   "fieldname": "request_date",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Request Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_status",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "Card",
+   "fieldname": "payment_method_type",
+   "fieldtype": "Select",
+   "label": "Payment Method Type",
+   "options": "\nCard\nBank Transfer\nAlipay\nWeChat Pay\nSofort\niDEAL\nSEPA Debit\nBacs Debit"
+  },
+  {
+   "description": "Payment request will expire after this date",
+   "fieldname": "expiry_date",
+   "fieldtype": "Date",
+   "label": "Expiry Date"
+  },
+  {
+   "fieldname": "gateway_section",
+   "fieldtype": "Section Break",
+   "label": "Gateway Configuration"
+  },
+  {
+   "description": "Select Stripe Settings to use for this payment",
+   "fieldname": "stripe_settings",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Stripe Settings",
+   "options": "Stripe Settings",
+   "reqd": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "depends_on": "eval: doc.stripe_settings",
+   "fetch_from": "stripe_settings.gateway_name",
+   "fetch_if_empty": 1,
+   "fieldname": "payment_gateway",
+   "fieldtype": "Data",
+   "label": "Payment Gateway",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_gateway",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "description": "Use Stripe test mode for this payment",
+   "fieldname": "use_sandbox",
+   "fieldtype": "Check",
+   "label": "Use Sandbox"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "webhook_status",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Webhook Status",
+   "read_only": 1
+  },
+  {
+   "fieldname": "payment_details_section",
+   "fieldtype": "Section Break",
+   "label": "Payment Details"
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Amount",
+   "reqd": 1
+  },
+  {
+   "default": "USD",
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency"
+  },
+  {
+   "fieldname": "column_break_amount",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "minimum_amount_check",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Minimum Amount Check",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "amount_in_cents",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Amount in Cents",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reference_section",
+   "fieldtype": "Section Break",
+   "label": "Reference Information"
+  },
+  {
+   "allow_on_submit": 1,
+   "description": "Document type that this payment is for",
+   "fieldname": "reference_doctype",
+   "fieldtype": "Link",
+   "label": "Reference Doctype",
+   "options": "DocType"
+  },
+  {
+   "allow_on_submit": 1,
+   "description": "Specific document this payment is for",
+   "fieldname": "reference_docname",
+   "fieldtype": "Dynamic Link",
+   "label": "Reference Document",
+   "options": "reference_doctype"
+  },
+  {
+   "fieldname": "column_break_reference",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fetch_from": "reference_docname.owner",
+   "fieldname": "reference_owner",
+   "fieldtype": "Data",
+   "label": "Reference Owner",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fetch_from": "reference_docname.status",
+   "fieldname": "reference_status",
+   "fieldtype": "Data",
+   "label": "Reference Status",
+   "read_only": 1
+  },
+  {
+   "fieldname": "payment_info_section",
+   "fieldtype": "Section Break",
+   "label": "Payment Information"
+  },
+  {
+   "default": "Payment Request",
+   "description": "Display title for the payment page",
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "label": "Title",
+   "reqd": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "description": "Description shown on payment page",
+   "fieldname": "description",
+   "fieldtype": "Text",
+   "label": "Description"
+  },
+  {
+   "fieldname": "column_break_payment_info",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "description": "URL to redirect after payment completion",
+   "fieldname": "redirect_url",
+   "fieldtype": "Data",
+   "label": "Redirect URL",
+   "placeholder": "/payment-success"
+  },
+  {
+   "allow_on_submit": 1,
+   "description": "Success message shown before redirect",
+   "fieldname": "redirect_message",
+   "fieldtype": "Small Text",
+   "label": "Redirect Message"
+  },
+  {
+   "fieldname": "customer_section",
+   "fieldtype": "Section Break",
+   "label": "Customer Information"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "payer_name",
+   "fieldtype": "Data",
+   "label": "Payer Name",
+   "reqd": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "payer_email",
+   "fieldtype": "Data",
+   "label": "Payer Email",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_customer",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "payer_phone",
+   "fieldtype": "Data",
+   "label": "Payer Phone"
+  },
+  {
+   "allow_on_submit": 1,
+   "description": "Internal customer identifier",
+   "fieldname": "customer_id",
+   "fieldtype": "Data",
+   "label": "Customer ID",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "stripe_payment_section",
+   "fieldtype": "Section Break",
+   "label": "Stripe Payment Data"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "stripe_payment_intent_id",
+   "fieldtype": "Data",
+   "label": "Stripe Payment Intent ID",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "stripe_client_secret",
+   "fieldtype": "Data",
+   "label": "Stripe Client Secret",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_stripe",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "stripe_payment_method_id",
+   "fieldtype": "Data",
+   "label": "Stripe Payment Method ID",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "stripe_customer_id",
+   "fieldtype": "Data",
+   "label": "Stripe Customer ID",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "metadata_section",
+   "fieldtype": "Section Break",
+   "label": "Metadata"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "payment_metadata",
+   "fieldtype": "Table",
+   "label": "Payment Metadata",
+   "options": "Stripe Request Metadata"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "custom_metadata",
+   "fieldtype": "Code",
+   "label": "Custom Metadata (JSON)",
+   "options": "JSON"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "response_section",
+   "fieldtype": "Section Break",
+   "label": "Response Data"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "payment_response",
+   "fieldtype": "Code",
+   "label": "Payment Response",
+   "options": "JSON",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "failure_message",
+   "fieldtype": "Text",
+   "label": "Failure Message",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_response",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "retry_count",
+   "fieldtype": "Int",
+   "label": "Retry Count",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "last_retry_date",
+   "fieldtype": "Datetime",
+   "label": "Last Retry Date",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "eval: doc.paid_at || doc.refunded_at",
+   "fieldname": "timestamps_section",
+   "fieldtype": "Section Break",
+   "label": "Timestamps"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "Now",
+   "fieldname": "created_at",
+   "fieldtype": "Datetime",
+   "label": "Created At",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "paid_at",
+   "fieldtype": "Datetime",
+   "label": "Paid At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_timestamps",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "refunded_at",
+   "fieldtype": "Datetime",
+   "label": "Refunded At",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "updated_at",
+   "fieldtype": "Datetime",
+   "label": "Updated At",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Stripe Request",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-05-03 18:00:43.332207",
+ "modified_by": "Administrator",
+ "module": "Triplen Connection",
+ "name": "Stripe Request",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
