@@ -1,0 +1,190 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-05-04 23:56:05.830620",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "user",
+  "membership_type",
+  "status",
+  "column_break_pweb",
+  "membership_duration",
+  "date_from",
+  "date_to",
+  "section_break_zfew",
+  "currency",
+  "column_break_qwjz",
+  "amount",
+  "section_break_xugh",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_xugh",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Caregiver Membership",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "user",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "User",
+   "options": "User",
+   "reqd": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "Pending",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Pending\nActive\nExpired",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_pweb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "date_from",
+   "fieldtype": "Datetime",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Date From",
+   "reqd": 1
+  },
+  {
+   "fieldname": "date_to",
+   "fieldtype": "Datetime",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Date To"
+  },
+  {
+   "fieldname": "section_break_zfew",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "USD",
+   "fetch_from": "membership_type.currency",
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Currency",
+   "options": "Currency"
+  },
+  {
+   "fieldname": "column_break_qwjz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "30",
+   "fetch_from": "membership_type.amount",
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Amount",
+   "options": "Currency",
+   "reqd": 1
+  },
+  {
+   "default": "15552000",
+   "fetch_from": "membership_type.membership_duration",
+   "fieldname": "membership_duration",
+   "fieldtype": "Duration",
+   "hide_seconds": 1,
+   "label": "Membership Duration",
+   "reqd": 1
+  },
+  {
+   "fieldname": "membership_type",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Membership Type",
+   "options": "Caregiver Membership Type",
+   "reqd": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [
+  {
+   "group": "Payments",
+   "link_doctype": "Membership Payment",
+   "link_fieldname": "membership"
+  }
+ ],
+ "modified": "2026-05-05 00:29:32.109380",
+ "modified_by": "Administrator",
+ "module": "Triplen Connection",
+ "name": "Caregiver Membership",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "search_fields": "user,membership_type",
+ "show_title_field_in_link": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [
+  {
+   "color": "Green",
+   "title": "Active"
+  },
+  {
+   "color": "Gray",
+   "title": "Pending"
+  },
+  {
+   "color": "Red",
+   "title": "Expired"
+  }
+ ],
+ "title_field": "user",
+ "translated_doctype": 1
+}

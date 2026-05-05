@@ -1,0 +1,73 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-05-05 00:37:13.229273",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "payment_gateway",
+  "column_break_nplu",
+  "gateway_settings",
+  "column_break_cdrw",
+  "gateway_controller"
+ ],
+ "fields": [
+  {
+   "fieldname": "payment_gateway",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Payment Gateway",
+   "options": "Payment Gateway",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "payment_gateway.gateway_settings",
+   "fieldname": "gateway_settings",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Gateway Settings",
+   "options": "DocType"
+  },
+  {
+   "fetch_from": "payment_gateway.gateway_controller",
+   "fieldname": "gateway_controller",
+   "fieldtype": "Dynamic Link",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Gateway Controller",
+   "options": "gateway_settings"
+  },
+  {
+   "fieldname": "column_break_nplu",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_cdrw",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-05-05 00:45:06.117049",
+ "modified_by": "Administrator",
+ "module": "Triplen Connection",
+ "name": "Payment Method Table",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
