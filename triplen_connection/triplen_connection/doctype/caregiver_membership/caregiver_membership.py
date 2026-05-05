@@ -77,7 +77,9 @@ def set_expired_memberships():
 
 
 @frappe.whitelist()
-def get_payment_url(membership_name, gateway, redirect_to=None):
+def get_payment_url(
+	membership_name, gateway, redirect_to="https://triplencaregiversconnection.com/dashboard"
+):
 	membership = frappe.get_doc("Caregiver Membership", membership_name)
 
 	controller = get_controller(gateway)
@@ -93,7 +95,7 @@ def get_payment_url(membership_name, gateway, redirect_to=None):
 		"payer_email": membership.user,
 		"payment_gateway": gateway,
 		"order_id": membership.name,
-		"redirect_to": redirect_to or frappe.utils.get_url(f"/app/caregiver-membership/{membership.name}"),
+		"redirect_to": redirect_to,
 	}
 
 	if hasattr(controller, "create_order"):

@@ -66,7 +66,7 @@ def check_or_create_membership():
 		}
 
 	method = m_type.payment_methods[0]
-	redirect_to = f"{get_frontend_url().rstrip('/')}/dashboard"
+	redirect_to = "https://triplencaregiversconnection.com/dashboard"
 
 	payment_url = get_payment_url(
 		membership_name=pending_membership,
