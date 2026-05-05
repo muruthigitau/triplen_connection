@@ -50,6 +50,8 @@ def check_or_create_membership():
 			}
 		)
 		doc.insert(ignore_permissions=True)
+		doc.flags.ignore_permissions = True
+		doc.submit()
 		pending_membership = doc.name
 
 	m_type_name = frappe.db.get_value("Caregiver Membership", pending_membership, "membership_type")
