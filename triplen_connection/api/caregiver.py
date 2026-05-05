@@ -67,8 +67,6 @@ def check_or_create_membership():
 	payment_url = get_payment_url(
 		membership_name=pending_membership,
 		gateway=method.payment_gateway,
-		gateway_controller=method.gateway_controller,
-		gateway_settings=method.gateway_settings,
 	)
 
 	return {
