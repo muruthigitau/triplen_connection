@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"id\":\"0rL4nLCR5s\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Triple N Caregivers Connection</span>\",\"col\":12}},{\"id\":\"Ty-dDLj6OS\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"W7ZtqX6dP3\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"User\",\"col\":4}},{\"id\":\"hfcKTJiA5m\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Job Posting\",\"col\":4}},{\"id\":\"LCmfri80Kf\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Job Application\",\"col\":4}},{\"id\":\"q3zrErQvAz\",\"type\":\"quick_list\",\"data\":{\"quick_list_name\":\"Job Posting\",\"col\":4}},{\"id\":\"gZjb43yrHT\",\"type\":\"quick_list\",\"data\":{\"quick_list_name\":\"Job Application\",\"col\":4}}]",
+ "content": "[{\"id\":\"0rL4nLCR5s\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Triple N Caregivers Connection</span>\",\"col\":12}},{\"id\":\"Ty-dDLj6OS\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"W7ZtqX6dP3\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"User\",\"col\":4}},{\"id\":\"hfcKTJiA5m\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Job Posting\",\"col\":4}},{\"id\":\"LCmfri80Kf\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Job Application\",\"col\":4}},{\"id\":\"mNkYGbQ_nZ\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Membership Type\",\"col\":4}},{\"id\":\"iQFMGPlOPT\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Caregiver Membership\",\"col\":4}},{\"id\":\"id0TJXky1J\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Membership Payment\",\"col\":4}},{\"id\":\"j2ZxnrUaRB\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"q3zrErQvAz\",\"type\":\"quick_list\",\"data\":{\"quick_list_name\":\"Job Posting\",\"col\":4}},{\"id\":\"gZjb43yrHT\",\"type\":\"quick_list\",\"data\":{\"quick_list_name\":\"Job Application\",\"col\":4}},{\"id\":\"CfCNLsLw2w\",\"type\":\"quick_list\",\"data\":{\"quick_list_name\":\"Active Memberships\",\"col\":4}}]",
  "creation": "2026-04-29 16:29:01.937830",
  "custom_blocks": [],
  "docstatus": 0,
@@ -13,7 +13,7 @@
  "is_hidden": 0,
  "label": "TripleN",
  "links": [],
- "modified": "2026-04-29 16:32:52.604780",
+ "modified": "2026-05-05 00:27:48.821181",
  "modified_by": "Administrator",
  "module": "Triplen Connection",
  "name": "TripleN",
@@ -26,6 +26,11 @@
    "document_type": "Job Posting",
    "label": "Job Posting",
    "quick_list_filter": "[[\"Job Posting\",\"status\",\"=\",\"Active\",false]]"
+  },
+  {
+   "document_type": "Caregiver Membership",
+   "label": "Active Memberships",
+   "quick_list_filter": "[[\"Caregiver Membership\",\"status\",\"=\",\"Active\",false]]"
   },
   {
    "document_type": "Job Application",
@@ -45,10 +50,26 @@
    "type": "DocType"
   },
   {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Membership Type",
+   "link_to": "Caregiver Membership Type",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
    "color": "Pink",
    "doc_view": "List",
    "label": "Job Posting",
    "link_to": "Job Posting",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Caregiver Membership",
+   "link_to": "Caregiver Membership",
    "stats_filter": "[]",
    "type": "DocType"
   },
@@ -58,6 +79,14 @@
    "label": "Job Application",
    "link_to": "Job Application",
    "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Membership Payment",
+   "link_to": "Membership Payment",
+   "stats_filter": "[[\"Membership Payment\",\"docstatus\",\"=\",\"1\",false]]",
    "type": "DocType"
   }
  ],

@@ -165,6 +165,11 @@ app_license = "agpl-3.0"
 # 		"triplen_connection.tasks.monthly"
 # 	],
 # }
+scheduler_events = {
+	"daily": [
+		"triplen_connection.triplen_connection.doctype.caregiver_membership.caregiver_membership.set_expired_memberships"
+	]
+}
 
 # Testing
 # -------
@@ -246,4 +251,3 @@ app_license = "agpl-3.0"
 # ------------
 # List of apps whose translatable strings should be excluded from this app's translations.
 # ignore_translatable_strings_from = []
-
