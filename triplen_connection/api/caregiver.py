@@ -1,6 +1,82 @@
-# triplen_connection/api/caregiver.py
 import frappe
 from frappe import _
+
+from triplen_connection.triplen_connection.doctype.caregiver_membership.caregiver_membership import (
+	get_payment_url,
+)
+
+
+@frappe.whitelist()
+def check_or_create_membership():
+	user = frappe.session.user
+	if user == "Guest":
+		frappe.throw(_("Please login to manage memberships"))
+
+	active_membership = frappe.db.get_value(
+		"Caregiver Membership", {"user": user, "status": "Active", "docstatus": 1}, "name"
+	)
+
+	if active_membership:
+		return {
+			"status": "Active",
+			"membership": active_membership,
+			"message": _("You have an active membership."),
+		}
+
+	pending_membership = frappe.db.get_value(
+		"Caregiver Membership", {"user": user, "status": "Pending", "docstatus": ["<", 2]}, "name"
+	)
+
+	if not pending_membership:
+		membership_type = frappe.db.get_value(
+			"Caregiver Membership Type", {}, "name", order_by="creation asc"
+		)
+
+		if not membership_type:
+			frappe.throw(_("No Membership Types configured in the system."))
+
+		m_type_doc = frappe.get_doc("Caregiver Membership Type", membership_type)
+
+		doc = frappe.get_doc(
+			{
+				"doctype": "Caregiver Membership",
+				"user": user,
+				"membership_type": membership_type,
+				"amount": m_type_doc.amount,
+				"currency": m_type_doc.currency,
+				"membership_duration": m_type_doc.membership_duration,
+				"status": "Pending",
+				"date_from": frappe.utils.now_datetime(),
+			}
+		)
+		doc.insert(ignore_permissions=True)
+		pending_membership = doc.name
+
+	m_type_name = frappe.db.get_value("Caregiver Membership", pending_membership, "membership_type")
+	m_type = frappe.get_doc("Caregiver Membership Type", m_type_name)
+
+	if not m_type.payment_methods:
+		return {
+			"status": "Pending",
+			"membership": pending_membership,
+			"message": _("Membership created, but no payment methods are available."),
+		}
+
+	method = m_type.payment_methods[0]
+
+	payment_url = get_payment_url(
+		membership_name=pending_membership,
+		gateway=method.payment_gateway,
+		gateway_controller=method.gateway_controller,
+		gateway_settings=method.gateway_settings,
+	)
+
+	return {
+		"status": "Pending",
+		"membership": pending_membership,
+		"payment_url": payment_url,
+		"gateway": method.payment_gateway,
+	}
 
 
 @frappe.whitelist()
