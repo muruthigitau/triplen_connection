@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 import frappe
+from frappe import _
 from frappe.model.document import Document
 from frappe.utils import add_to_date, get_datetime, now_datetime
 from payments.utils import get_payment_gateway_controller
@@ -76,53 +77,89 @@ def set_expired_memberships():
 		frappe.db.commit()
 
 
+# @frappe.whitelist()
+# def get_payment_url(
+# 	membership_name, gateway, redirect_to="https://triplencaregiversconnection.com/dashboard"
+# ):
+# 	membership = frappe.get_doc("Caregiver Membership", membership_name)
+
+# 	controller = get_controller(gateway)
+
+# 	payment_details = {
+# 		"amount": membership.amount,
+# 		"currency": membership.currency,
+# 		"description": f"Membership Payment for {membership.user}",
+# 		"title": f"Payment for Caregiver Membership: {membership.name}",
+# 		"reference_doctype": "Caregiver Membership",
+# 		"reference_docname": membership.name,
+# 		"payer_name": membership.user,
+# 		"payer_email": membership.user,
+# 		"payment_gateway": gateway,
+# 		"order_id": membership.name,
+# 		"redirect_to": redirect_to,
+# 	}
+
+# 	if hasattr(controller, "create_order"):
+# 		order = controller.create_order(**payment_details)
+# 		payment_details.update({"order_id": order.get("id")})
+
+# 	expected_keys = (
+# 		"amount",
+# 		"title",
+# 		"description",
+# 		"reference_doctype",
+# 		"reference_docname",
+# 		"payer_name",
+# 		"payer_email",
+# 		"currency",
+# 		"payment_gateway",
+# 		"redirect_to",
+# 	)
+
+# 	filtered_details = {k: v for k, v in payment_details.items() if k in expected_keys}
+
+# 	if "order_id" in payment_details:
+# 		filtered_details["order_id"] = payment_details["order_id"]
+
+# 	url = controller.get_payment_url(**filtered_details)
+
+# 	return url
+
+
 @frappe.whitelist()
 def get_payment_url(
 	membership_name, gateway, redirect_to="https://triplencaregiversconnection.com/dashboard"
 ):
 	membership = frappe.get_doc("Caregiver Membership", membership_name)
 
-	controller = get_controller(gateway)
+	stripe_settings = frappe.db.get_value("Payment Gateway", gateway, "gateway_controller")
 
-	payment_details = {
-		"amount": membership.amount,
-		"currency": membership.currency,
-		"description": f"Membership Payment for {membership.user}",
-		"title": f"Payment for Caregiver Membership: {membership.name}",
-		"reference_doctype": "Caregiver Membership",
-		"reference_docname": membership.name,
-		"payer_name": membership.user,
-		"payer_email": membership.user,
-		"payment_gateway": gateway,
-		"order_id": membership.name,
-		"redirect_to": redirect_to,
-	}
+	if not stripe_settings:
+		frappe.throw(_("Stripe Settings not found for gateway: {0}").format(gateway))
 
-	if hasattr(controller, "create_order"):
-		order = controller.create_order(**payment_details)
-		payment_details.update({"order_id": order.get("id")})
-
-	expected_keys = (
-		"amount",
-		"title",
-		"description",
-		"reference_doctype",
-		"reference_docname",
-		"payer_name",
-		"payer_email",
-		"currency",
-		"payment_gateway",
-		"redirect_to",
+	stripe_request = frappe.get_doc(
+		{
+			"doctype": "Stripe Request",
+			"stripe_settings": stripe_settings,
+			"amount": membership.amount,
+			"currency": membership.currency,
+			"reference_doctype": "Caregiver Membership",
+			"reference_docname": membership.name,
+			"title": _("Payment for Membership: {0}").format(membership.name),
+			"description": _("Membership Payment for {0}").format(membership.user),
+			"payer_name": frappe.db.get_value("User", membership.user, "full_name") or membership.user,
+			"payer_email": membership.user,
+			"redirect_url": redirect_to,
+			"paid": 0,
+		}
 	)
+	stripe_request.flags.ignore_permissions = True
+	stripe_request.insert(ignore_permissions=True)
+	stripe_request.submit()
+	base_url = "/stripe"
+	payment_url = f"{base_url}?request_id={stripe_request.name}"
 
-	filtered_details = {k: v for k, v in payment_details.items() if k in expected_keys}
-
-	if "order_id" in payment_details:
-		filtered_details["order_id"] = payment_details["order_id"]
-
-	url = controller.get_payment_url(**filtered_details)
-
-	return url
+	return payment_url
 
 
 def get_controller(payment_gateway):

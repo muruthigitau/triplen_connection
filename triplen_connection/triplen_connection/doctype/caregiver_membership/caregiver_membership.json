@@ -143,9 +143,14 @@
    "group": "Payments",
    "link_doctype": "Membership Payment",
    "link_fieldname": "membership"
+  },
+  {
+   "group": "Stripe",
+   "link_doctype": "Stripe Request",
+   "link_fieldname": "reference_docname"
   }
  ],
- "modified": "2026-05-05 00:29:32.109380",
+ "modified": "2026-05-06 16:55:50.427169",
  "modified_by": "Administrator",
  "module": "Triplen Connection",
  "name": "Caregiver Membership",
