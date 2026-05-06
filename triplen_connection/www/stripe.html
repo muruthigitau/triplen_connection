@@ -5,70 +5,76 @@ block script %}
 	{% include "templates/includes/stripe.js" %}
 </script>
 {% endblock %} {%- block page_content -%}
-<div id="payment-section">
-	<div class="payment-card">
-		<div class="payment-header">
-			{% if image %}
-			<img src="{{ image }}" alt="Brand Logo" />
-			{% endif %}
-			<h2 id="header-title">{{ title or _("Complete Payment") }}</h2>
-			<p id="header-description">{{ description }}</p>
+<div class="stripe" id="payment-section">
+	<div class="col-sm-10 col-sm-offset-1">
+		{% if image %}
+		<div class="text-center mb-4">
+			<img src="{{ image }}" style="max-height: 60px" />
 		</div>
+		{% endif %}
+
+		<h2 id="header-title" class="text-center">{{ title or _("Complete Payment") }}</h2>
+		<p id="header-description" class="text-center mb-4">{{ description }}</p>
 
 		{% if not paid %}
 		<form id="payment-form">
-			<div class="form-group">
-				<label for="cardholder-name">{{ _("Cardholder Name") }}</label>
-				<input
-					id="cardholder-name"
-					name="cardholder-name"
-					class="input-field"
-					placeholder="Jane Doe"
-					value="{{ payer_name }}"
-				/>
+			<div class="form-row row">
+				<div class="group col-12 mb-3">
+					<label class="label">{{ _("Name") }}</label>
+					<input
+						id="cardholder-name"
+						name="cardholder-name"
+						class="form-control"
+						placeholder="{{ _('John Doe') }}"
+						value="{{ payer_name }}"
+					/>
+				</div>
+
+				<div class="group col-12 mb-3">
+					<label class="label">{{ _("Email") }}</label>
+					<input
+						id="cardholder-email"
+						name="cardholder-email"
+						type="email"
+						class="form-control"
+						placeholder="{{ _('john@doe.com') }}"
+						value="{{ payer_email }}"
+					/>
+				</div>
+
+				<div class="group col-12 mb-4">
+					<label class="label">{{ _("Card Details") }}</label>
+					<div
+						id="card-element"
+						class="form-control"
+						style="height: 45px; padding: 12px"
+					></div>
+					<div id="card-errors" class="text-danger mt-2" role="alert"></div>
+				</div>
 			</div>
 
-			<div class="form-group">
-				<label for="cardholder-email">{{ _("Email Address") }}</label>
-				<input
-					id="cardholder-email"
-					name="cardholder-email"
-					type="email"
-					class="input-field"
-					placeholder="jane@example.com"
-					value="{{ payer_email }}"
-				/>
-			</div>
-
-			<div class="form-group">
-				<label>{{ _("Card Details") }}</label>
-				<div id="card-element"></div>
-				<div id="card-errors" role="alert"></div>
-			</div>
-
-			<button class="submit-btn" id="submit">{{ _("Pay") }} {{ amount }}</button>
+			<button type="submit" class="btn btn-primary btn-block btn-lg mb-4" id="submit">
+				{{ _('Pay') }} {{ amount }}
+			</button>
 		</form>
 		{% endif %}
 
-		<div
-			id="success-container"
-			class="outcome"
-			style="{% if not paid %}display: none;{% else %}display: block;{% endif %}"
-		>
-			<div class="success-msg mb-4" style="text-align: center">
-				<p>{{ _("Your payment has been successfully processed.") }}</p>
-			</div>
-			<a
-				href="{{ redirect_url }}"
-				class="submit-btn text-center"
-				style="text-decoration: none; display: block; text-align: center"
-			>
-				{{ _("Go Back") }}
-			</a>
-		</div>
+		<div class="outcome text-center">
+			<div class="error text-danger alert alert-danger" style="display: none"></div>
 
-		<div class="outcome">
-			<div class="error-msg" id="payment-error" hidden></div>
+			<div
+				class="success alert alert-success"
+				style="{% if not paid %}display: none;{% endif %}"
+			>
+				<i class="fa fa-check-circle mb-2" style="font-size: 2rem; display: block"></i>
+				{{ _("Your payment has been successfully registered.") }} {% if paid %}
+				<div class="mt-3">
+					<a href="{{ redirect_url }}" class="btn btn-success"
+						>{{ _("Return to Dashboard") }}</a
+					>
+				</div>
+				{% endif %}
+			</div>
 		</div>
 	</div>
 </div>

@@ -1,99 +1,88 @@
-var stripe = Stripe("{{ publishable_key }}");
-var elements = stripe.elements();
+frappe.ready(function() {
+    var publishable_key = "{{ publishable_key }}";
+    
+    if (!publishable_key || publishable_key === "None") {
+        console.error("Stripe Publishable Key is missing.");
+        $('#card-errors').text("Configuration error: Stripe API key not found.");
+        $('#submit').prop('disabled', true);
+        return;
+    }
 
-var style = {
-	base: {
-		color: "#425466",
-		fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-		fontSmoothing: "antialiased",
-		fontSize: "16px",
-		"::placeholder": {
-			color: "#aab7c4",
-		},
-	},
-	invalid: {
-		color: "#df1b41",
-		iconColor: "#df1b41",
-	},
-};
+    var stripe = Stripe(publishable_key);
+    var elements = stripe.elements();
 
-var card = elements.create("card", {
-	style: style,
-	hidePostalCode: true,
+    var style = {
+        base: {
+            color: 'green',
+            lineHeight: '18px',
+            fontWeight: 700,
+            fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
+            fontSmoothing: 'antialiased',
+            fontSize: '16px',
+            '::placeholder': { color: '#aab7c4' }
+        },
+        invalid: {
+            color: '#fa755a',
+            iconColor: '#fa755a'
+        }
+    };
+
+    var card = elements.create('card', { hidePostalCode: true, style: style });
+    card.mount('#card-element');
+
+    card.on('change', function(event) {
+        var displayError = document.getElementById('card-errors');
+        displayError.textContent = event.error ? event.error.message : '';
+    });
+
+    $('#submit').off("click").on("click", function(e) {
+        e.preventDefault();
+        
+        var btn = $(this);
+        btn.prop('disabled', true).html("{{ _('Processing...') }}");
+        $('.error').hide();
+
+        var extraDetails = {
+            name: $('#cardholder-name').val(),
+            email: $('#cardholder-email').val()
+        };
+
+        stripe.createToken(card, extraDetails).then(function(result) {
+            if (result.error) {
+                $('#card-errors').text(result.error.message);
+                btn.prop('disabled', false).html("{{ _('Pay') }} {{ amount }}");
+            } else {
+                executeFrappePayment(result.token.id);
+            }
+        });
+    });
+
+    function executeFrappePayment(tokenId) {
+        frappe.call({
+            method: "triplen_connection.www.stripe.make_payment",
+            headers: { "X-Requested-With": "XMLHttpRequest" },
+            args: {
+                "stripe_token_id": tokenId,
+                "stripe_request_id": "{{ stripe_request_id }}",
+                "data": JSON.stringify({{ frappe.form_dict|json }}),
+                "reference_doctype": "{{ reference_doctype }}",
+                "reference_docname": "{{ reference_docname }}",
+                "payment_gateway": "{{ payment_gateway }}"
+            },
+            callback: function(r) {
+                if (r.message && r.message.status == "Completed") {
+                    $('#payment-form').hide();
+                    $('#header-title').text("{{ _('Payment Successful') }}");
+                    $('.success').show();
+                    setTimeout(function() {
+                        window.location.href = r.message.redirect_to;
+                    }, 2000);
+                } else {
+                    $('#submit').prop('disabled', false).html("{{ _('Pay') }} {{ amount }}");
+                    var msg = (r.message && r.message.error) ? r.message.error : "{{ _('Payment failed') }}";
+                    $('.error').text(msg).show();
+                }
+            }
+        });
+    }
 });
-
-card.mount("#card-element");
-
-card.on("change", function (event) {
-	var displayError = document.getElementById("card-errors");
-	displayError.textContent = event.error ? event.error.message : "";
-});
-
-frappe.ready(function () {
-	var form = document.getElementById("payment-form");
-	if (!form) return;
-
-	form.addEventListener("submit", function (e) {
-		e.preventDefault();
-
-		var btn = document.getElementById("submit");
-		var errorDisplay = document.getElementById("payment-error");
-
-		btn.disabled = true;
-		btn.textContent = "{{ _('Processing...') }}";
-		errorDisplay.hidden = true;
-
-		var extraDetails = {
-			name: document.getElementById("cardholder-name").value,
-			email: document.getElementById("cardholder-email").value,
-		};
-
-		stripe.createToken(card, extraDetails).then(function (result) {
-			if (result.error) {
-				btn.disabled = false;
-				btn.textContent = "{{ _('Pay') }} {{ amount }}";
-				errorDisplay.textContent = result.error.message;
-				errorDisplay.hidden = false;
-			} else {
-				makeFrappePayment(result.token.id);
-			}
-		});
-	});
-});
-
-function makeFrappePayment(tokenId) {
-	frappe.call({
-		method: "payments.templates.pages.stripe_checkout.make_payment",
-		args: {
-			stripe_token_id: tokenId,
-			stripe_request_id: "{{ stripe_request_id }}",
-		},
-		callback: function (r) {
-			if (r.message && r.message.status === "Completed") {
-				var form = document.getElementById("payment-form");
-				if (form) form.style.display = "none";
-
-				document.getElementById("header-title").textContent =
-					"{{ _('Payment Successful') }}";
-				document.getElementById("header-description").textContent =
-					"{{ _('Thank you for your payment.') }}";
-
-				var successDiv = document.getElementById("success-container");
-				successDiv.style.display = "block";
-
-				setTimeout(function () {
-					window.location.href = r.message.redirect_to || "{{ redirect_url }}";
-				}, 3000);
-			} else {
-				var btn = document.getElementById("submit");
-				var errorDisplay = document.getElementById("payment-error");
-				errorDisplay.textContent =
-					(r.message && r.message.error) ||
-					"{{ _('Payment failed. Please try again.') }}";
-				errorDisplay.hidden = false;
-				btn.disabled = false;
-				btn.textContent = "{{ _('Pay') }} {{ amount }}";
-			}
-		},
-	});
-}
