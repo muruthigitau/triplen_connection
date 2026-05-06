@@ -87,7 +87,17 @@ def make_payment(
 	payment_response = doc.create_request(payload)
 
 	if payment_response.get("status") == "Completed":
-		stripe_request.db_set("paid", 1)
+		stripe_request.paid = 1
+		stripe_request.flags.ignore_permissions = True
+		ref_doc = frappe.get_doc(stripe_request.reference_doctype, stripe_request.reference_docname)
+		try:
+			ref_doc.on_payment_authorized(payment_response.get("status"))
+		except AttributeError:
+			frappe.log_error(
+				"Stripe Payment: Missing on_payment_authorized method",
+				f"{stripe_request.reference_doctype} does not have an on_payment_authorized method.",
+			)
+		stripe_request.save()
 		frappe.db.commit()
 		payment_response["redirect_to"] = success_url
 
