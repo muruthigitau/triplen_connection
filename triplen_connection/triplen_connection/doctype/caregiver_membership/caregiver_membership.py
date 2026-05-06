@@ -156,10 +156,8 @@ def get_payment_url(
 	stripe_request.flags.ignore_permissions = True
 	stripe_request.insert(ignore_permissions=True)
 	stripe_request.submit()
-	base_url = "/stripe"
-	payment_url = f"{base_url}?request_id={stripe_request.name}"
 
-	return payment_url
+	return stripe_request.route
 
 
 def get_controller(payment_gateway):
