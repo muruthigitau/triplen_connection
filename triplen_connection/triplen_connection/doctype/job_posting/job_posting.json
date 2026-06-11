@@ -61,7 +61,7 @@
   },
   {
    "fieldname": "posted_date",
-   "fieldtype": "Datetime",
+   "fieldtype": "Date",
    "in_filter": 1,
    "in_list_view": 1,
    "in_preview": 1,
