@@ -21,6 +21,7 @@ def get_available_jobs():
 			JobPosting.description,
 			JobPosting.posted_date,
 			JobPosting.status,
+			JobPosting.pay_frequency,
 		)
 		.where(JobPosting.status == "Active")
 		.orderby(JobPosting.posted_date, order=frappe.qb.desc)
@@ -45,6 +46,7 @@ def get_job_details(job_id):
 			JobPosting.description,
 			JobPosting.posted_date,
 			JobPosting.status,
+			JobPosting.pay_frequency,
 		)
 		.where(JobPosting.name == job_id)
 	).run(as_dict=True)
@@ -134,6 +136,7 @@ def get_applied_jobs():
 			JobPosting.location,
 			JobPosting.pay,
 			JobPosting.schedule,
+			JobPosting.pay_frequency,
 		)
 		.where((JobApplication.user == user) & (JobApplication.docstatus == 1))
 		.orderby(JobApplication.application_date, order=frappe.qb.desc)
@@ -187,6 +190,7 @@ def get_saved_jobs():
 			JobPosting.location,
 			JobPosting.pay,
 			JobPosting.schedule,
+			JobPosting.pay_frequency,
 			JobPosting.description,
 			JobPosting.status.as_("job_status"),
 		)
@@ -287,6 +291,7 @@ def get_application_details(application_id):
 			JobPosting.location,
 			JobPosting.pay,
 			JobPosting.schedule,
+			JobPosting.pay_frequency,
 			JobPosting.description,
 		)
 		.where(
@@ -335,6 +340,7 @@ def get_all_job_applications_for_admin():
 			JobPosting.location,
 			JobPosting.pay,
 			JobPosting.schedule,
+			JobPosting.pay_frequency,
 		)
 		.where(JobApplication.docstatus == 1)
 		.orderby(JobApplication.application_date, order=frappe.qb.desc)
