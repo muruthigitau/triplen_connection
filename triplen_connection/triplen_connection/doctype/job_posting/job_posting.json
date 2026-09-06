@@ -8,8 +8,9 @@
   "title",
   "location",
   "posted_date",
-  "column_break_fjcr",
   "status",
+  "column_break_fjcr",
+  "pay_frequency",
   "pay",
   "schedule",
   "section_break_cmif",
@@ -94,12 +95,19 @@
    "fieldtype": "Table",
    "label": "Requirements",
    "options": "Job Requirement"
+  },
+  {
+   "default": "Monthly",
+   "fieldname": "pay_frequency",
+   "fieldtype": "Select",
+   "label": "Pay Frequency",
+   "options": "Hourly\nDaily\nWeekly\nBi-weekly\nMonthly\nAnnual"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-06-11 23:18:10.687988",
+ "modified": "2026-09-06 13:11:39.338352",
  "modified_by": "Administrator",
  "module": "Triplen Connection",
  "name": "Job Posting",
