@@ -6,6 +6,47 @@ from triplen_connection.triplen_connection.doctype.caregiver_membership.caregive
 	get_payment_url,
 )
 
+# API field name -> (custom fieldname on User, default value).
+# These fields are optional: they only exist on sites where the caregiver
+# customisations have been installed, so they are read and written defensively.
+CAREGIVER_PROFILE_FIELDS = {
+	"address": ("custom_address", ""),
+	"experience_years": ("custom_experience_years", ""),
+	"skills": ("custom_skills", []),
+	"availability": ("custom_availability", ""),
+	"bio": ("custom_bio", ""),
+}
+
+
+def _get_profile_field(user_doc, fieldname, default):
+	"""Read an optional caregiver field from a User document.
+
+	Args:
+	    user_doc: User document being read.
+	    fieldname: Custom fieldname to read.
+	    default: Value returned when the field is not installed or empty.
+
+	Returns:
+	    The stored value, or ``default``.
+	"""
+	if not user_doc.meta.has_field(fieldname):
+		return default
+
+	return user_doc.get(fieldname) or default
+
+
+def _set_profile_field(user_doc, fieldname, value):
+	"""Write an optional caregiver field on a User document.
+
+	Args:
+	    user_doc: User document being updated.
+	    fieldname: Custom fieldname to update.
+	    value: Value to store. Falsy values are ignored, matching the
+	        existing behaviour of the profile endpoint.
+	"""
+	if value and user_doc.meta.has_field(fieldname):
+		setattr(user_doc, fieldname, value)
+
 
 @frappe.whitelist()
 def check_or_create_membership():
@@ -96,17 +137,15 @@ def get_profile():
 		"last_name": user_doc.last_name,
 		"email": user_doc.email,
 		"phone": user_doc.mobile_no or "",
-		"address": user_doc.custom_address or "",
-		"experience_years": user_doc.custom_experience_years or "",
-		"skills": user_doc.custom_skills or [],
-		"availability": user_doc.custom_availability or "",
-		"bio": user_doc.custom_bio or "",
 		"certifications": frappe.db.get_all(
 			"Caregiver Certification",
 			filters={"user": user},
 			fields=["name", "certification_name", "certification_file", "upload_date"],
 		),
 	}
+
+	for api_field, (fieldname, default) in CAREGIVER_PROFILE_FIELDS.items():
+		profile[api_field] = _get_profile_field(user_doc, fieldname, default)
 
 	return profile
 
@@ -126,16 +165,9 @@ def update_profile(profile_data):
 		user_doc.last_name = profile_data["last_name"]
 	if profile_data.get("phone"):
 		user_doc.mobile_no = profile_data["phone"]
-	if profile_data.get("address"):
-		user_doc.custom_address = profile_data["address"]
-	if profile_data.get("experience_years"):
-		user_doc.custom_experience_years = profile_data["experience_years"]
-	if profile_data.get("skills"):
-		user_doc.custom_skills = profile_data["skills"]
-	if profile_data.get("availability"):
-		user_doc.custom_availability = profile_data["availability"]
-	if profile_data.get("bio"):
-		user_doc.custom_bio = profile_data["bio"]
+
+	for api_field, (fieldname, _default) in CAREGIVER_PROFILE_FIELDS.items():
+		_set_profile_field(user_doc, fieldname, profile_data.get(api_field))
 
 	user_doc.save(ignore_permissions=True)
 
